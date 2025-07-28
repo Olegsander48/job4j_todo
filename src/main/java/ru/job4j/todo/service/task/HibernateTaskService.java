@@ -35,6 +35,7 @@ public class HibernateTaskService implements TaskService {
 
     @Override
     public void update(Task task) {
+        findById(task.getId());
         if (task.getDescription().isBlank()) {
             throw new IllegalArgumentException("Description cannot be empty");
         }

@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:insert="~{fragments/header :: header}"></head>
+<body>
+<div class="container">
+    <p></p>
+    <div class="text-center">
+        <h4>Добро пожаловать на Job4j_todo!</h4>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <ul class="list-group">
+                <li class="list-group-item">Переходите на страницу <a th:href="@{/tasks}">задачи</a> чтобы просмотреть все задачи</li>
+                <li class="list-group-item">Добавьте <a th:href="@{/tasks/create}">новую</a> задачу</li>
+            </ul>
+        </div>
+    </div>
+</div>
+<footer th:insert="~{fragments/footer :: footer}"></footer>
+</body>
+</html>

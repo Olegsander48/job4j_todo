@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Data
 @AllArgsConstructor
@@ -19,7 +20,11 @@ public class Task {
     private int id;
     private String description;
     @EqualsAndHashCode.Exclude
-    private LocalDateTime created;
+    private LocalDateTime created = LocalDateTime.now();
     @EqualsAndHashCode.Exclude
     private boolean done;
+
+    public String getFormattedCreationDate() {
+        return created.format(DateTimeFormatter.ofPattern("HH:mm dd-MM-yyyy"));
+    }
 }
