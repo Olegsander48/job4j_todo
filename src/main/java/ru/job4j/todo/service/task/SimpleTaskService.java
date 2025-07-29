@@ -9,10 +9,10 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @Service
-public class HibernateTaskService implements TaskService {
+public class SimpleTaskService implements TaskService {
     private TaskRepository taskRepository;
 
-    public HibernateTaskService(TaskRepository taskRepository) {
+    public SimpleTaskService(TaskRepository taskRepository) {
         this.taskRepository = taskRepository;
     }
 
