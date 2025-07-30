@@ -9,6 +9,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import ru.job4j.todo.configuration.HibernateConfiguration;
 import ru.job4j.todo.model.Task;
+import ru.job4j.todo.repository.CrudRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -20,8 +21,9 @@ class HibernateTaskRepositoryTest {
     static void initRepositories() {
         var configuration = new HibernateConfiguration();
         SessionFactory sessionFactory = configuration.sf();
+        var crudRepository = new CrudRepository(sessionFactory);
 
-        hibernateTaskRepository = new HibernateTaskRepository(sessionFactory);
+        hibernateTaskRepository = new HibernateTaskRepository(crudRepository);
     }
 
     @AfterEach

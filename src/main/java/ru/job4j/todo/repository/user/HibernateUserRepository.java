@@ -1,120 +1,50 @@
 package ru.job4j.todo.repository.user;
 
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Repository;
-import ru.job4j.todo.model.Task;
 import ru.job4j.todo.model.User;
+import ru.job4j.todo.repository.CrudRepository;
 
 import java.util.Collection;
-import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Repository
+@AllArgsConstructor
 public class HibernateUserRepository implements UserRepository {
-    private SessionFactory sessionFactory;
-
-    public HibernateUserRepository(SessionFactory sessionFactory) {
-        this.sessionFactory = sessionFactory;
-    }
+    private final CrudRepository crudRepository;
 
     @Override
     public Optional<User> save(User user) {
-        Session session = sessionFactory.openSession();
-        try {
-            session.beginTransaction();
-            session.save(user);
-            session.getTransaction().commit();
-        } catch (Exception e) {
-            if (session.getTransaction() != null && session.getTransaction().isActive()) {
-                session.getTransaction().rollback();
-            }
-            throw e;
-        } finally {
-            session.close();
-        }
-        return Optional.ofNullable(user);
+        crudRepository.run(session -> session.save(user));
+        return crudRepository.optional(
+                "from User where id = :fId", User.class,
+                Map.of("fId", user.getId()));
     }
 
     @Override
     public Optional<User> findByLoginAndPassword(String login, String password) {
-        Optional<User> user;
-        Session session = sessionFactory.openSession();
-        try {
-            session.beginTransaction();
-            user = session.createQuery("from User where login = :login and password = :password")
-                    .setParameter("login", login)
-                    .setParameter("password", password)
-                    .stream().findFirst();
-            session.getTransaction().commit();
-        } catch (Exception e) {
-            if (session.getTransaction() != null && session.getTransaction().isActive()) {
-                session.getTransaction().rollback();
-            }
-            throw e;
-        } finally {
-            session.close();
-        }
-        return user;
+        return crudRepository.optional(
+                "from User where login = :fLogin and password = :fPassword", User.class,
+                Map.of("fLogin", login, "fPassword", password));
     }
 
     @Override
     public Collection<User> findAll() {
-        List<User> users;
-        Session session = sessionFactory.openSession();
-        try {
-            session.beginTransaction();
-            users = session.createQuery("from User").list();
-            session.getTransaction().commit();
-        } catch (Exception e) {
-            if (session.getTransaction() != null && session.getTransaction().isActive()) {
-                session.getTransaction().rollback();
-            }
-            throw e;
-        } finally {
-            session.close();
-        }
-        return users;
+        return crudRepository.query("from User", User.class);
     }
 
     @Override
     public Optional<User> findById(int id) {
-        User user;
-        Session session = sessionFactory.openSession();
-        try {
-            session.beginTransaction();
-            user = session.get(User.class, id);
-            session.getTransaction().commit();
-        } catch (Exception e) {
-            if (session.getTransaction() != null && session.getTransaction().isActive()) {
-                session.getTransaction().rollback();
-            }
-            throw e;
-        } finally {
-            session.close();
-        }
-        return Optional.ofNullable(user);
+        return crudRepository.optional(
+                "from User where id = :fId", User.class,
+                Map.of("fId", id));
     }
 
     @Override
     public boolean deleteById(int id) {
-        User user;
-        Session session = sessionFactory.openSession();
-        try {
-            session.beginTransaction();
-            user = session.get(User.class, id);
-            if (user != null) {
-                session.delete(user);
-            }
-            session.getTransaction().commit();
-        } catch (Exception e) {
-            if (session.getTransaction() != null && session.getTransaction().isActive()) {
-                session.getTransaction().rollback();
-            }
-            throw e;
-        } finally {
-            session.close();
-        }
-        return user != null;
+        return crudRepository.executeUpdate(
+                "delete from User where id = :fid",
+                Map.of("fid", id));
     }
 }

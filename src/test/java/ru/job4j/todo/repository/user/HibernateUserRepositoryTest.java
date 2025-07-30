@@ -11,6 +11,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import ru.job4j.todo.configuration.HibernateConfiguration;
 import ru.job4j.todo.model.User;
+import ru.job4j.todo.repository.CrudRepository;
 
 import java.util.List;
 
@@ -21,8 +22,9 @@ class HibernateUserRepositoryTest {
     static void init() {
         var configuration = new HibernateConfiguration();
         SessionFactory sessionFactory = configuration.sf();
+        var crudRepository = new CrudRepository(sessionFactory);
 
-        hibernateUserRepository = new HibernateUserRepository(sessionFactory);
+        hibernateUserRepository = new HibernateUserRepository(crudRepository);
     }
 
     @AfterEach
