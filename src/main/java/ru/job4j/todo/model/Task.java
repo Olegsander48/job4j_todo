@@ -23,6 +23,9 @@ public class Task {
     private LocalDateTime created = LocalDateTime.now();
     @EqualsAndHashCode.Exclude
     private boolean done;
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
 
     public String getFormattedCreationDate() {
         return created.format(DateTimeFormatter.ofPattern("HH:mm dd-MM-yyyy"));

@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.ui.ConcurrentModel;
 import ru.job4j.todo.model.Task;
+import ru.job4j.todo.model.User;
 import ru.job4j.todo.service.task.TaskService;
 
 import java.time.LocalDateTime;
@@ -59,7 +60,7 @@ class TaskControllerTest {
         when(taskService.save(task)).thenReturn(task);
 
         var model = new ConcurrentModel();
-        var view = taskController.create(task, model);
+        var view = taskController.create(task, model, new User());
 
         assertThat(view).isEqualTo("redirect:/tasks");
     }
@@ -74,7 +75,7 @@ class TaskControllerTest {
         when(taskService.save(task)).thenThrow(expectedException);
 
         var model = new ConcurrentModel();
-        var view = taskController.create(task, model);
+        var view = taskController.create(task, model, new User());
         var errorMessage = model.getAttribute("message");
 
         assertThat(view).isEqualTo("fragments/errors/404");
@@ -215,7 +216,6 @@ class TaskControllerTest {
     void whenUpdateTaskThenRedirectToTasks() {
         var task = new Task();
         var created = "2024-01-01T12:00";
-
         var model = new ConcurrentModel();
         var view = taskController.updateTask(task, created, model);
 
