@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import ru.job4j.todo.model.User;
 import ru.job4j.todo.service.user.UserService;
 
-import java.util.NoSuchElementException;
+import javax.security.auth.login.FailedLoginException;
 
 @Controller
 @RequestMapping("/users")
@@ -50,7 +50,7 @@ public class UserController {
             var session = request.getSession();
             session.setAttribute("user", userOptional.get());
             return "redirect:/tasks";
-        } catch (NoSuchElementException ex) {
+        } catch (FailedLoginException ex) {
             model.addAttribute("error", ex.getMessage());
             return "users/login";
         }

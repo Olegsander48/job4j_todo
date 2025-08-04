@@ -4,7 +4,7 @@ import org.springframework.stereotype.Service;
 import ru.job4j.todo.model.User;
 import ru.job4j.todo.repository.user.UserRepository;
 
-import java.util.NoSuchElementException;
+import javax.security.auth.login.FailedLoginException;
 import java.util.Optional;
 
 @Service
@@ -24,10 +24,10 @@ public class SimpleUserService implements UserService {
     }
 
     @Override
-    public Optional<User> findByLoginAndPassword(String login, String password) {
+    public Optional<User> findByLoginAndPassword(String login, String password) throws FailedLoginException {
         Optional<User> user = userRepository.findByLoginAndPassword(login, password);
         if (user.isEmpty()) {
-            throw new NoSuchElementException("Login or password is incorrect");
+            throw new FailedLoginException("Login or password is incorrect");
         }
         return user;
     }

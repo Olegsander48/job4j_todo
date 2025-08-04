@@ -13,7 +13,7 @@ import org.springframework.ui.ConcurrentModel;
 import ru.job4j.todo.model.User;
 import ru.job4j.todo.service.user.UserService;
 
-import java.util.NoSuchElementException;
+import javax.security.auth.login.FailedLoginException;
 import java.util.Optional;
 
 class UserControllerTest {
@@ -86,7 +86,7 @@ class UserControllerTest {
      * Test case: Log in with an existing user and verify redirection to sessions and user stored in session.
      */
     @Test
-    void whenLoginExistingUserThenGetRedirectionAndSameUser() {
+    void whenLoginExistingUserThenGetRedirectionAndSameUser() throws FailedLoginException {
         var user = new User(1, "Aleks prig", "example@test.com", "qwerty123");
         var expectedUser = Optional.of(user);
         when(userService.findByLoginAndPassword(user.getLogin(), user.getPassword())).thenReturn(expectedUser);
@@ -103,8 +103,8 @@ class UserControllerTest {
      * Test case: Attempt login with invalid credentials and verify error message is shown on login page.
      */
     @Test
-    void whenLoginNonExistingUserThenGetRedirectionAndErrorMessage() {
-        var expectedException = new NoSuchElementException("Login or password is incorrect");
+    void whenLoginNonExistingUserThenGetRedirectionAndErrorMessage() throws FailedLoginException {
+        var expectedException = new FailedLoginException("Login or password is incorrect");
         when(userService.findByLoginAndPassword(any(), any())).thenThrow(expectedException);
 
         var model = new ConcurrentModel();
