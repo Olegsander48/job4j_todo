@@ -13,6 +13,7 @@
                 <th scope="col">Дата публикации задачи</th>
                 <th scope="col">Статус</th>
                 <th scope="col">Автор задачи</th>
+                <th scope="col">Приоритет</th>
             </tr>
             </thead>
             <tbody>
@@ -27,6 +28,7 @@
                 <td th:if="${task.done}">Выполнено</td>
                 <td th:unless="${task.done}">В работе</td>
                 <td th:text="${task.user.getName()}"></td>
+                <td th:text="${task.priority.getName()}"></td>
             </tr>
             </tbody>
         </table>

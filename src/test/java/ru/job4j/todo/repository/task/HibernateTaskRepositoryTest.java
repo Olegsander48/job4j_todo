@@ -9,6 +9,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import ru.job4j.todo.configuration.HibernateConfiguration;
+import ru.job4j.todo.model.Priority;
 import ru.job4j.todo.model.Task;
 import ru.job4j.todo.model.User;
 import ru.job4j.todo.repository.CrudRepository;
@@ -16,22 +17,29 @@ import ru.job4j.todo.repository.user.HibernateUserRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 class HibernateTaskRepositoryTest {
     private static HibernateTaskRepository hibernateTaskRepository;
     private static HibernateUserRepository hibernateUserRepository;
+    private static CrudRepository crudRepository;
     private static User user;
+    private static Priority priority;
 
     @BeforeAll
     static void initRepositories() {
         var configuration = new HibernateConfiguration();
         SessionFactory sessionFactory = configuration.sf();
-        var crudRepository = new CrudRepository(sessionFactory);
+        crudRepository = new CrudRepository(sessionFactory);
 
         hibernateUserRepository = new HibernateUserRepository(crudRepository);
         hibernateTaskRepository = new HibernateTaskRepository(crudRepository);
 
         user = hibernateUserRepository.save(new User()).get();
+
+        var priorities = crudRepository.query("from Priority", Priority.class);
+        priority = priorities.isEmpty() ? new Priority() : priorities.get(0);
+
     }
 
     @AfterEach
@@ -48,11 +56,21 @@ class HibernateTaskRepositoryTest {
     }
 
     /**
+     * Helper method to get priority by name from database
+     */
+    private Priority getPriorityByName(String name) {
+        var priorities = crudRepository.query("from Priority p where p.name = :name", Priority.class, Map.of("name", name));
+        return priorities.isEmpty() ? new Priority() : priorities.get(0);
+    }
+
+    /**
      * Test case: Save a task to the database and verify that the same task can be retrieved.
      */
     @Test
     void whenSaveThenGetSame() {
-        var task = hibernateTaskRepository.save(new Task(1, "test description", LocalDateTime.now(), true, user));
+        // You can also use specific priority by name if needed
+        var urgentPriority = getPriorityByName("urgently");
+        var task = hibernateTaskRepository.save(new Task(1, "test description", LocalDateTime.now(), true, user, urgentPriority));
         var savedTask = hibernateTaskRepository.findById(task.getId());
         assertThat(savedTask).contains(task);
     }
@@ -62,9 +80,9 @@ class HibernateTaskRepositoryTest {
      */
     @Test
     void whenSaveSeveralThenGetAll() {
-        var task1 = hibernateTaskRepository.save(new Task(1, "test description1", LocalDateTime.now(), true, user));
-        var task2 = hibernateTaskRepository.save(new Task(2, "test description2", LocalDateTime.now(), true, user));
-        var task3 = hibernateTaskRepository.save(new Task(3, "test description3", LocalDateTime.now(), true, user));
+        var task1 = hibernateTaskRepository.save(new Task(1, "test description1", LocalDateTime.now(), true, user, priority));
+        var task2 = hibernateTaskRepository.save(new Task(2, "test description2", LocalDateTime.now(), true, user, priority));
+        var task3 = hibernateTaskRepository.save(new Task(3, "test description3", LocalDateTime.now(), true, user, priority));
         var result = hibernateTaskRepository.findAll();
         assertThat(result).isEqualTo(List.of(task1, task2, task3));
     }
@@ -83,7 +101,7 @@ class HibernateTaskRepositoryTest {
      */
     @Test
     void whenDeleteThenGetEmptyOptional() {
-        var task = hibernateTaskRepository.save(new Task(1, "test description", LocalDateTime.now(), true, user));
+        var task = hibernateTaskRepository.save(new Task(1, "test description", LocalDateTime.now(), true, user, priority));
         var isDeleted = hibernateTaskRepository.deleteById(task.getId());
         var savedTask = hibernateTaskRepository.findById(task.getId());
         assertThat(isDeleted).isTrue();
@@ -103,8 +121,8 @@ class HibernateTaskRepositoryTest {
      */
     @Test
     void whenUpdateThenGetUpdated() {
-        var task = hibernateTaskRepository.save(new Task(1, "test description", LocalDateTime.now(), true, user));
-        var updatedTask = new Task(task.getId(), "updated test description", task.getCreated(), false, user);
+        var task = hibernateTaskRepository.save(new Task(1, "test description", LocalDateTime.now(), true, user, priority));
+        var updatedTask = new Task(task.getId(), "updated test description", task.getCreated(), false, user, priority);
         hibernateTaskRepository.update(updatedTask);
         var savedTask = hibernateTaskRepository.findById(task.getId());
         assertThat(savedTask).contains(updatedTask);
