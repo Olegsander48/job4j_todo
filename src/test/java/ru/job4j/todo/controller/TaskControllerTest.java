@@ -3,8 +3,11 @@ package ru.job4j.todo.controller;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.ui.ConcurrentModel;
+import ru.job4j.todo.model.Priority;
 import ru.job4j.todo.model.Task;
 import ru.job4j.todo.model.User;
+import ru.job4j.todo.service.category.CategoryService;
+import ru.job4j.todo.service.priority.PriorityService;
 import ru.job4j.todo.service.task.TaskService;
 
 import java.time.LocalDateTime;
@@ -14,17 +17,22 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 class TaskControllerTest {
     private TaskService taskService;
+    private CategoryService categoryService;
     private TaskController taskController;
+    private PriorityService priorityService;
 
     @BeforeEach
     void setUp() {
         taskService = mock(TaskService.class);
-        taskController = new TaskController(taskService);
+        categoryService = mock(CategoryService.class);
+        priorityService = mock(PriorityService.class);
+        taskController = new TaskController(taskService, categoryService, priorityService);
     }
 
     /**
@@ -48,7 +56,8 @@ class TaskControllerTest {
      */
     @Test
     void whenGetCreationPageThenCreateViewReturned() {
-        assertThat(taskController.getCreationPage()).isEqualTo("tasks/create");
+        var model = new ConcurrentModel();
+        assertThat(taskController.getCreationPage(model)).isEqualTo("tasks/create");
     }
 
     /**
@@ -58,9 +67,10 @@ class TaskControllerTest {
     void whenCreateTaskThenRedirectToTasks() {
         var task = new Task();
         when(taskService.save(task)).thenReturn(task);
+        when(priorityService.findByName(any())).thenReturn(Optional.of(new Priority()));
 
         var model = new ConcurrentModel();
-        var view = taskController.create(task, model, new User());
+        var view = taskController.create(task, model, new User(), any(), List.of(1, 2));
 
         assertThat(view).isEqualTo("redirect:/tasks");
     }
@@ -70,12 +80,13 @@ class TaskControllerTest {
      */
     @Test
     void whenCreateTaskThrowsExceptionThenErrorViewReturned() {
-        var expectedException = new RuntimeException("Failed to save task");
+        var expectedException = new IllegalArgumentException("Failed to save task");
         var task = new Task();
         when(taskService.save(task)).thenThrow(expectedException);
+        when(priorityService.findByName(any())).thenReturn(Optional.of(new Priority()));
 
         var model = new ConcurrentModel();
-        var view = taskController.create(task, model, new User());
+        var view = taskController.create(task, model, new User(), any(), List.of(1, 2));
         var errorMessage = model.getAttribute("message");
 
         assertThat(view).isEqualTo("fragments/errors/404");

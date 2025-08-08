@@ -16,7 +16,7 @@ public class HibernateTaskRepository implements TaskRepository {
 
     @Override
     public Task save(Task task) {
-        crudRepository.run(session -> session.save(task));
+        crudRepository.run(session -> session.persist(task));
         return task;
     }
 
@@ -41,6 +41,6 @@ public class HibernateTaskRepository implements TaskRepository {
 
     @Override
     public Collection<Task> findAll() {
-        return crudRepository.query("from Task t JOIN FETCH t.priority", Task.class);
+        return crudRepository.query("from Task t JOIN FETCH t.priority JOIN FETCH t.user", Task.class);
     }
 }

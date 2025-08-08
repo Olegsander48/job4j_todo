@@ -33,6 +33,14 @@
                     <td th:unless="${task.done}">В работе</td>
                 </div>
             </div>
+            <div class="row">
+                <div class="col-3">
+                    <label class="form-label"><b>Приоритет:</b></label>
+                </div>
+                <div class="col-9">
+                    <p th:text="${task.priority.getName()}"></p>
+                </div>
+            </div>
         </div>
         <br>
         <div class="row">
